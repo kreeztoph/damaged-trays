@@ -32,7 +32,7 @@ def auth_gspread(sheet_name):
     # Directly access Streamlit secrets and parse them as JSON
     credentials_dict = st.secrets["gcp"] 
     
-    creds = ServiceAccountCredentials.from_json_keyfile_name(credentials_dict, scope)
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
     client = gspread.authorize(creds)
 
     try:
