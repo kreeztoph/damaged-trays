@@ -30,7 +30,10 @@ class ErrorHandler:
 # Google Sheets authentication and loading
 def auth_gspread(creds_path, sheet_name):
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    creds = ServiceAccountCredentials.from_json_keyfile_name(creds_path, scope)
+    # Directly access Streamlit secrets and parse them as JSON
+    credentials_dict = st.secrets["gcp"] 
+    
+    creds = ServiceAccountCredentials.from_json_keyfile_name(credentials_dict, scope)
     client = gspread.authorize(creds)
 
     try:
