@@ -14,7 +14,6 @@ st.set_page_config(page_title="📊 PLC and Tote Monitor", layout="wide")
 count = st_autorefresh(interval=300000, limit=None, key="auto-refresh")
 
 # Google Sheets config
-creds_path = "sick-lcy3-data.json"
 sheet_name = "Data Monitor ENIS"
 
 # Error logging
