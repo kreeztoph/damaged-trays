@@ -27,7 +27,7 @@ class ErrorHandler:
             f.write(traceback.format_exc() + "\n")
 
 # Google Sheets authentication and loading
-def auth_gspread(creds_path, sheet_name):
+def auth_gspread(sheet_name):
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
     # Directly access Streamlit secrets and parse them as JSON
     credentials_dict = st.secrets["gcp"] 
@@ -83,7 +83,7 @@ def main():
             st.rerun()
     st.markdown("---")
     try:
-        plc_sheet, memory_sheet = auth_gspread(creds_path, sheet_name)
+        plc_sheet, memory_sheet = auth_gspread(sheet_name)
         plc_df = load_df(plc_sheet)
         memory_df = load_df(memory_sheet, parse_dates="Most Recent Timestamp")
         cols1,cols2,cols3 = st.columns(3)
