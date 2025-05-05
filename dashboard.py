@@ -121,13 +121,11 @@ def main():
         st.markdown("### 📈 Tote Appearances Over Time")
 
         import plotly.express as px
-
+        memory_df = memory_df.sort_values('Most Recent Timestamp')
+        memory_df['Corrected Timestamp'] = memory_df['Most Recent Timestamp'] + pd.Timedelta(hours=1)
+        memory_df['Corrected Timestamp'] = memory_df['Corrected Timestamp'].dt.strftime('%d %b, %Y %H:%M')
+        memory_df = memory_df[memory_df['Count'] > 1]
         if not memory_df.empty:
-            memory_df = memory_df.sort_values('Most Recent Timestamp')
-            memory_df['Corrected Timestamp'] = memory_df['Most Recent Timestamp'] + pd.Timedelta(hours=1)
-            memory_df['Corrected Timestamp'] = memory_df['Corrected Timestamp'].dt.strftime('%d %b, %Y %H:%M')
-            memory_df = memory_df[memory_df['Count'] > 1]
-
             fig = px.line(
                 memory_df,
                 x='Corrected Timestamp',
@@ -138,15 +136,8 @@ def main():
             st.plotly_chart(fig)
         else:
             st.info("No memory data available to plot.")
-            
-        import plotly.express as px
 
         if not memory_df.empty:
-            memory_df = memory_df.sort_values('Most Recent Timestamp')
-            memory_df['Corrected Timestamp'] = memory_df['Most Recent Timestamp'] + pd.Timedelta(hours=1)
-            memory_df['Corrected Timestamp'] = memory_df['Corrected Timestamp'].dt.strftime('%d %b, %Y %H:%M')
-            memory_df = memory_df[memory_df['Count'] > 1]
-
             fig = px.bar(
                 memory_df,
                 x='Tote ID',
