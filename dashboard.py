@@ -6,12 +6,21 @@ import traceback
 import time
 from datetime import datetime
 from streamlit_autorefresh import st_autorefresh
+import plotly.express as px
+
+# Reset manual_refresh after rerun
+if "manual_refresh" in st.session_state and st.session_state.manual_refresh:
+    st.session_state.manual_refresh = False
 
 # Page config
 st.set_page_config(page_title="📊 PLC and Tote Monitor", layout="wide")
 
-# Refresh every 5 minutes (300000 ms)
-count = st_autorefresh(interval=300000, limit=None, key="auto-refresh")
+if "manual_refresh" not in st.session_state:
+    st.session_state.manual_refresh = False
+
+# Only auto-refresh if manual refresh not just triggered
+if not st.session_state.manual_refresh:
+    count = st_autorefresh(interval=300000, limit=None, key="auto-refresh")
 
 # Google Sheets config
 sheet_name = "Data Monitor ENIS"
@@ -137,17 +146,94 @@ def main():
         else:
             st.info("No memory data available to plot.")
 
-        if not memory_df.empty:
-            fig = px.bar(
-                memory_df,
-                x='Tote ID',
-                y='Count',
-                hover_data=['Corrected Timestamp'],  # Show timestamp info on hover
-                title='Count of Memory Data per Tote ID'
-            )
-            st.plotly_chart(fig)
-        else:
-            st.info("No memory data available to plot.")
+                # Initialize session state for filtered data
+        if "filtered_df" not in st.session_state:
+            st.session_state.filtered_df = memory_df.copy()
+
+        # Time Filter Selection
+        time_options = ["All Data", "Last 1 Day", "Last 2 Days", "Last 7 Days", "Last 1 Month", "Custom Range"]
+        # Initialize session state for selected filter
+        if "selected_time_filter" not in st.session_state:
+            st.session_state.selected_time_filter = "All Data"
+
+        # Time Filter Selection
+        time_options = ["All Data", "Last 1 Day", "Last 2 Days", "Last 7 Days", "Last 1 Month", "Custom Range"]
+        selected_time = st.selectbox("Select Time Range", time_options, key="selected_time_filter")
+
+        # Define time filtering logic (without page reload)
+        now = pd.Timestamp.now()
+
+        if selected_time == "Last 1 Day":
+            filtered_df = memory_df[memory_df["Most Recent Timestamp"] >= now - pd.Timedelta(days=1)]
+        elif selected_time == "Last 2 Days":
+            filtered_df = memory_df[memory_df["Most Recent Timestamp"] >= now - pd.Timedelta(days=2)]
+        elif selected_time == "Last 7 Days":
+            filtered_df = memory_df[memory_df["Most Recent Timestamp"] >= now - pd.Timedelta(days=7)]
+        elif selected_time == "Last 1 Month":
+            filtered_df = memory_df[memory_df["Most Recent Timestamp"] >= now - pd.Timedelta(days=30)]
+        elif selected_time == "Custom Range":
+            with st.form("Custom Range Selection"):
+                st.write("### Select Date Range")
+
+                # Get min/max values from the dataset
+                min_date = memory_df["Most Recent Timestamp"].min()
+                max_date = memory_df["Most Recent Timestamp"].max()
+
+                # Date selection inputs within the form
+                start_date = st.date_input("Start Date", min_value=min_date, value=min_date)
+                end_date = st.date_input("End Date", min_value=min_date, value=max_date)
+
+                # Submit button for applying the filter
+                submitted = st.form_submit_button("Apply Filter")
+
+            # Filter data only after form submission
+            if submitted:
+                filtered_df = memory_df[
+                    (memory_df["Most Recent Timestamp"] >= pd.to_datetime(start_date)) & 
+                    (memory_df["Most Recent Timestamp"] <= pd.to_datetime(end_date))
+                ]
+
+        else:  # "All Data" selected
+            filtered_df = memory_df.copy()
+        colz1,colz2,colz3,colz4,colz5,colz6 = st.columns(6)
+        with colz1:
+            st.metric(label='Total Tote Count',value=len(filtered_df['Tote ID'].unique()),border=True)
+        # Sort the dataframe by count in descending order
+        top_totes = filtered_df.sort_values("Count", ascending=False).head(5)
+
+        # Assign each concern to a column
+        columns = [colz2, colz3, colz4, colz5, colz6]
+
+        for i, (_, row) in enumerate(top_totes.iterrows()):
+            with columns[i]:  # Dynamically place each metric in its column
+                st.metric(
+                    label=f"{i + 1}️⃣ Concern",  # Rank indicator
+                    value=f"{row['Tote ID']}",  # Tote ID
+                    help=f"Last Seen: {row['Corrected Timestamp']}\n | Total Scans: {row['Count']}",  # Hover details
+                    border=True
+                )
+
+        column1,column2 = st.columns([0.3,0.7])
+        with column1:
+            # Display filtered results
+                if not filtered_df.empty:
+                    st.dataframe(filtered_df, hide_index=True)
+        with column2:
+            # Use the filtered data for visualization
+            if not filtered_df.empty:
+                fig = px.line(
+                    filtered_df,
+                    x='Most Recent Timestamp',
+                    y='Count',
+                    hover_data=['Tote ID'],
+                    title='Filtered Memory Data Over Time'
+                )
+                st.plotly_chart(fig)
+            else:
+                st.info("No data available for the selected time range.")
+    except Exception as e:
+        ErrorHandler.log_error(e)
+        st.error(f"❌ An error occurred: {e}")
 
 
         
