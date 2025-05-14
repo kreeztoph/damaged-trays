@@ -59,7 +59,12 @@ def auth_gspread(sheet_name):
     except gspread.exceptions.WorksheetNotFound:
         memory_sheet = spreadsheet.add_worksheet(title="memory_data", rows="100", cols="10")
 
-    return plc_sheet, memory_sheet
+    try:
+        daily_sheet = spreadsheet.worksheet("daily_data")
+    except gspread.exceptions.WorksheetNotFound:
+        daily_sheet = spreadsheet.add_worksheet(title="daily_data", rows="100", cols="10")
+
+    return plc_sheet, memory_sheet , daily_sheet
 
 # Load data from Google Sheets
 def load_df(sheet, parse_dates=None):
@@ -92,10 +97,11 @@ def main():
             st.rerun()
     st.markdown("---")
     try:
-        plc_sheet, memory_sheet = auth_gspread(sheet_name)
+        plc_sheet, memory_sheet , daily_sheet = auth_gspread(creds_path, sheet_name)
         plc_df = load_df(plc_sheet)
         memory_df = load_df(memory_sheet, parse_dates="Most Recent Timestamp")
-        cols1,cols2,cols3 = st.columns(3)
+        daily_df = load_df(daily_sheet)
+        cols1,cols2,cols3,cols4 = st.columns(4)
         with cols1:
             st.subheader("📋 Latest PLC Data")
             if not plc_df.empty:
@@ -116,6 +122,13 @@ def main():
                 else:
                     st.info("Scanned Trays in Memory")
             with cols3:
+                st.subheader("📋 Scanned Tray Daily Count")
+                if not daily_df.empty:
+                    daily_df_display = daily_df.copy()
+                    st.dataframe(daily_df_display, hide_index=True,use_container_width=True)
+                else:
+                    st.info("No Daily data")
+            with cols4:
                 st.subheader("📦 Scanned Tray Insights")
                 total_totes = memory_df['Tote ID'].nunique() if not memory_df.empty else 0
                 st.metric("Unique Trays Scanned", f"{total_totes} Trays", border=True)
