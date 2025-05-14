@@ -85,7 +85,7 @@ def format_custom_datetime(dt):
 def main():
     til1,til2, til3 = st.columns([0.7,0.1,0.2])
     with til1:
-        st.title("📦 Real-Time Tote Monitoring Dashboard")
+        st.title("📦 Real-Time Tray Monitoring Dashboard")
     with til3:
         # Manual refresh
         if st.button("🔁 Manual Refresh Now"):
@@ -107,27 +107,27 @@ def main():
                 st.info("No PLC data found.")
             
             with cols2:
-                st.subheader("📋 Scanned Totes in Memory")
+                st.subheader("📋 Scanned Trays in Memory")
                 if not memory_df.empty:
                     memory_df_display = memory_df.copy()
                     memory_df_display['Most Recent Timestamp'] = pd.to_datetime(memory_df_display['Most Recent Timestamp']) + pd.Timedelta(hours=1)
                     memory_df_display['Most Recent Timestamp'] = memory_df_display['Most Recent Timestamp'].dt.strftime('%d %b, %Y %H:%M')
                     st.dataframe(memory_df_display, hide_index=True)
                 else:
-                    st.info("Scanned Totes in Memory")
+                    st.info("Scanned Trays in Memory")
             with cols3:
-                st.subheader("📦 Scanned Tote Insights")
+                st.subheader("📦 Scanned Tray Insights")
                 total_totes = memory_df['Tote ID'].nunique() if not memory_df.empty else 0
-                st.metric("Unique Totes Scanned", f"{total_totes} totes", border=True)
+                st.metric("Unique Trays Scanned", f"{total_totes} Trays", border=True)
                 total_appearances = memory_df['Count'].sum() if not memory_df.empty else 0
-                st.metric("Total Defective Totes Scanned", f"{int(total_appearances)} totes", border=True)
+                st.metric("Total Defective Trays Scanned", f"{int(total_appearances)} Trays", border=True)
                 latest_time = memory_df['Most Recent Timestamp'].max() if not memory_df.empty else None
                 formatted_time = format_custom_datetime(latest_time) if latest_time else "N/A"
-                st.metric("Last Scanned Tote Time", formatted_time, border=True)
+                st.metric("Last Scanned Tray Time", formatted_time, border=True)
             
 
         st.markdown("---")
-        st.markdown("### 📈 Tote Appearances Over Time")
+        st.markdown("### 📈 Tray Appearances Over Time")
 
         import plotly.express as px
         memory_df = memory_df.sort_values('Most Recent Timestamp')
@@ -197,7 +197,7 @@ def main():
             filtered_df = memory_df.copy()
         colz1,colz2,colz3,colz4,colz5,colz6 = st.columns(6)
         with colz1:
-            st.metric(label='Total Tote Count',value=len(filtered_df['Tote ID'].unique()),border=True)
+            st.metric(label='Total Tray Count',value=len(filtered_df['Tote ID'].unique()),border=True)
         # Sort the dataframe by count in descending order
         top_totes = filtered_df.sort_values("Count", ascending=False).head(5)
 
@@ -208,7 +208,7 @@ def main():
             with columns[i]:  # Dynamically place each metric in its column
                 st.metric(
                     label=f"{i + 1}️⃣ Concern",  # Rank indicator
-                    value=f"{row['Tote ID']}",  # Tote ID
+                    value=f"{row['Tote ID']}",  # Tray ID
                     help=f"Last Seen: {row['Corrected Timestamp']}\n | Total Scans: {row['Count']}",  # Hover details
                     border=True
                 )
