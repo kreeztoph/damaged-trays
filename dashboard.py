@@ -97,7 +97,7 @@ def main():
             st.rerun()
     st.markdown("---")
     try:
-        plc_sheet, memory_sheet , daily_sheet = auth_gspread(creds_path, sheet_name)
+        plc_sheet, memory_sheet , daily_sheet = auth_gspread(sheet_name)
         plc_df = load_df(plc_sheet)
         memory_df = load_df(memory_sheet, parse_dates="Most Recent Timestamp")
         daily_df = load_df(daily_sheet)
