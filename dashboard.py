@@ -13,7 +13,7 @@ if "manual_refresh" in st.session_state and st.session_state.manual_refresh:
     st.session_state.manual_refresh = False
 
 # Page config
-st.set_page_config(page_title="📊 PLC and Tote Monitor", layout="wide")
+st.set_page_config(page_title="📊 PLC and Tray Monitor", layout="wide")
 
 if "manual_refresh" not in st.session_state:
     st.session_state.manual_refresh = False
@@ -50,19 +50,19 @@ def auth_gspread(sheet_name):
         spreadsheet = client.create(sheet_name)
 
     try:
-        plc_sheet = spreadsheet.worksheet("plc_data")
+        plc_sheet = spreadsheet.worksheet("plc_data_1")
     except gspread.exceptions.WorksheetNotFound:
-        plc_sheet = spreadsheet.add_worksheet(title="plc_data", rows="100", cols="10")
+        plc_sheet = spreadsheet.add_worksheet(title="plc_data_1", rows="100", cols="10")
 
     try:
-        memory_sheet = spreadsheet.worksheet("memory_data")
+        memory_sheet = spreadsheet.worksheet("memory_data_1")
     except gspread.exceptions.WorksheetNotFound:
-        memory_sheet = spreadsheet.add_worksheet(title="memory_data", rows="100", cols="10")
-
+        memory_sheet = spreadsheet.add_worksheet(title="memory_data_1", rows="100", cols="10")
+    
     try:
-        daily_sheet = spreadsheet.worksheet("daily_data")
+        daily_sheet = spreadsheet.worksheet("daily_data_1")
     except gspread.exceptions.WorksheetNotFound:
-        daily_sheet = spreadsheet.add_worksheet(title="daily_data", rows="100", cols="10")
+        daily_sheet = spreadsheet.add_worksheet(title="daily_data_1", rows="100", cols="10")
 
     return plc_sheet, memory_sheet , daily_sheet
 
@@ -130,8 +130,8 @@ def main():
                     st.info("No Daily data")
             with cols4:
                 st.subheader("📦 Scanned Tray Insights")
-                total_totes = memory_df['Tote ID'].nunique() if not memory_df.empty else 0
-                st.metric("Unique Trays Scanned", f"{total_totes} Trays", border=True)
+                total_Trays = memory_df['Tray ID'].nunique() if not memory_df.empty else 0
+                st.metric("Unique Trays Scanned", f"{total_Trays} Trays", border=True)
                 total_appearances = memory_df['Count'].sum() if not memory_df.empty else 0
                 st.metric("Total Defective Trays Scanned", f"{int(total_appearances)} Trays", border=True)
                 latest_time = memory_df['Most Recent Timestamp'].max() if not memory_df.empty else None
@@ -152,7 +152,7 @@ def main():
                 memory_df,
                 x='Corrected Timestamp',
                 y='Count',
-                hover_data=['Tote ID'],  # Add Tote ID to the hover
+                hover_data=['Tray ID'],  # Add Tray ID to the hover
                 title='Memory Data Over Time'
             )
             st.plotly_chart(fig)
@@ -210,18 +210,18 @@ def main():
             filtered_df = memory_df.copy()
         colz1,colz2,colz3,colz4,colz5,colz6 = st.columns(6)
         with colz1:
-            st.metric(label='Total Tray Count',value=len(filtered_df['Tote ID'].unique()),border=True)
+            st.metric(label='Total Tray Count',value=len(filtered_df['Tray ID'].unique()),border=True)
         # Sort the dataframe by count in descending order
-        top_totes = filtered_df.sort_values("Count", ascending=False).head(5)
+        top_Trays = filtered_df.sort_values("Count", ascending=False).head(5)
 
         # Assign each concern to a column
         columns = [colz2, colz3, colz4, colz5, colz6]
 
-        for i, (_, row) in enumerate(top_totes.iterrows()):
+        for i, (_, row) in enumerate(top_Trays.iterrows()):
             with columns[i]:  # Dynamically place each metric in its column
                 st.metric(
                     label=f"{i + 1}️⃣ Concern",  # Rank indicator
-                    value=f"{row['Tote ID']}",  # Tray ID
+                    value=f"{row['Tray ID']}",  # Tray ID
                     help=f"Last Seen: {row['Corrected Timestamp']}\n | Total Scans: {row['Count']}",  # Hover details
                     border=True
                 )
@@ -238,7 +238,7 @@ def main():
                     filtered_df,
                     x='Most Recent Timestamp',
                     y='Count',
-                    hover_data=['Tote ID'],
+                    hover_data=['Tray ID'],
                     title='Filtered Memory Data Over Time'
                 )
                 st.plotly_chart(fig)
