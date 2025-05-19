@@ -161,6 +161,7 @@ def main():
         
         with graph_column_2:
             st.subheader('Daily scans count')
+
             if not daily_df.empty:
                 daily_df = daily_df.sort_values('Date')
 
@@ -168,12 +169,17 @@ def main():
                     daily_df,
                     x='Date',
                     y='Daily Trigger Count',
-                    # hover_data=['Tray ID'],  # Add Tray ID to the hover
                     title='Daily Tray Scans'
                 )
+
+                # Ensure y-axis starts from 0
+                fig_1.update_layout(yaxis=dict(range=[0, daily_df['Daily Trigger Count'].max()]))
+
                 st.plotly_chart(fig_1)
             else:
                 st.info("No daily count available to plot.")
+
+        
         st.markdown("---")
         # Initialize session state for filtered data
         if "filtered_df" not in st.session_state:
