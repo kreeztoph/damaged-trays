@@ -174,8 +174,8 @@ def main():
                 st.plotly_chart(fig_1)
             else:
                 st.info("No daily count available to plot.")
-
-                # Initialize session state for filtered data
+        st.markdown("---")
+        # Initialize session state for filtered data
         if "filtered_df" not in st.session_state:
             st.session_state.filtered_df = memory_df.copy()
 
