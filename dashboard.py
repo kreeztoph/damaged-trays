@@ -138,26 +138,42 @@ def main():
                 formatted_time = format_custom_datetime(latest_time) if latest_time else "N/A"
                 st.metric("Last Scanned Tray Time", formatted_time, border=True)
             
-
         st.markdown("---")
-        st.markdown("### 📈 Tray Appearances Over Time")
+        graph_column_1,graph_column_2 = st.columns([0.6,0.4])
+        with graph_column_1:
+            st.markdown("### 📈 Tray Appearances Over Time")
+            if not memory_df.empty:
+                memory_df = memory_df.sort_values('Most Recent Timestamp')
+                memory_df['Corrected Timestamp'] = memory_df['Most Recent Timestamp'] + pd.Timedelta(hours=1)
+                memory_df['Corrected Timestamp'] = memory_df['Corrected Timestamp'].dt.strftime('%d %b, %Y %H:%M')
+                memory_df = memory_df[memory_df['Count'] > 1]
 
-        import plotly.express as px
-        memory_df = memory_df.sort_values('Most Recent Timestamp')
-        memory_df['Corrected Timestamp'] = memory_df['Most Recent Timestamp'] + pd.Timedelta(hours=1)
-        memory_df['Corrected Timestamp'] = memory_df['Corrected Timestamp'].dt.strftime('%d %b, %Y %H:%M')
-        memory_df = memory_df[memory_df['Count'] > 1]
-        if not memory_df.empty:
-            fig = px.line(
-                memory_df,
-                x='Corrected Timestamp',
-                y='Count',
-                hover_data=['Tray ID'],  # Add Tray ID to the hover
-                title='Memory Data Over Time'
-            )
-            st.plotly_chart(fig)
-        else:
-            st.info("No memory data available to plot.")
+                fig = px.line(
+                    memory_df,
+                    x='Corrected Timestamp',
+                    y='Count',
+                    hover_data=['Tray ID'],  # Add Tray ID to the hover
+                    title='Memory Data Over Time'
+                )
+                st.plotly_chart(fig)
+            else:
+                st.info("No memory data available to plot.")
+        
+        with graph_column_2:
+            st.subheader('Daily scans count')
+            if not daily_df.empty:
+                daily_df = daily_df.sort_values('Date')
+
+                fig_1 = px.line(
+                    daily_df,
+                    x='Date',
+                    y='Daily Trigger Count',
+                    # hover_data=['Tray ID'],  # Add Tray ID to the hover
+                    title='Daily Tray Scans'
+                )
+                st.plotly_chart(fig_1)
+            else:
+                st.info("No daily count available to plot.")
 
                 # Initialize session state for filtered data
         if "filtered_df" not in st.session_state:
