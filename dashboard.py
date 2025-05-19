@@ -88,6 +88,7 @@ def format_custom_datetime(dt):
 
 # Main app
 def main():
+    st.info('Last updated by @aakalkri under the supervision of @didymiod for @enistepe',icon="ℹ️")
     til1,til2, til3 = st.columns([0.7,0.1,0.2])
     with til1:
         st.title("📦 Real-Time Tray Monitoring Dashboard")
