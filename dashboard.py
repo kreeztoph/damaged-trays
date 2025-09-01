@@ -63,8 +63,14 @@ def auth_gspread(sheet_name):
         daily_sheet = spreadsheet.worksheet("daily_data_1")
     except gspread.exceptions.WorksheetNotFound:
         daily_sheet = spreadsheet.add_worksheet(title="daily_data_1", rows="100", cols="10")
+    
+    try:
+        triggered_sheet = spreadsheet.worksheet("triggered_daily_count")
+    except gspread.exceptions.WorksheetNotFound:
+        triggered_sheet = spreadsheet.add_worksheet(title="triggered_daily_count", rows="100", cols="10")
 
-    return plc_sheet, memory_sheet , daily_sheet
+
+    return plc_sheet, memory_sheet , daily_sheet, triggered_sheet
 
 # Load data from Google Sheets
 def load_df(sheet, parse_dates=None):
@@ -102,7 +108,9 @@ def main():
         plc_df = load_df(plc_sheet)
         memory_df = load_df(memory_sheet, parse_dates="Most Recent Timestamp")
         daily_df = load_df(daily_sheet)
-        cols1,cols2,cols3,cols4 = st.columns(4)
+        counter_df = load_df(triggered_sheet, parse_dates="Date")
+
+        cols1,cols2,cols3,cols4,cols5 = st.columns(4)
         with cols1:
             st.subheader("📋 Latest PLC Data")
             if not plc_df.empty:
@@ -138,7 +146,47 @@ def main():
                 latest_time = memory_df['Most Recent Timestamp'].max() if not memory_df.empty else None
                 formatted_time = format_custom_datetime(latest_time) if latest_time else "N/A"
                 st.metric("Last Scanned Tray Time", formatted_time, border=True)
+            with cols5:
+                if not counter_df.empty:
+                    latest_pct = counter_df['Pct Change'].iloc[-1]  # Last day's % change
+                    latest_value = counter_df['Counter'].iloc[-1]   # Last day's raw counter
+                    st.metric(
+                        label="Latest PLC Counter Change",
+                        value=f"{latest_pct:.1f}%",
+                        delta=f"{latest_value} raw triggers",
+                        delta_color="inverse"  # Green if decrease, Red if increase
+                    )
+                else:
+                    st.info("No PLC counter data yet.")
+
+
             
+        st.markdown("---")
+                # --- 30-Day PLC Daily Counter Graph (% Change) ---
+        if not counter_df.empty:
+            counter_df['Date'] = pd.to_datetime(counter_df['Date'])
+            counter_df = counter_df.sort_values('Date').tail(30)
+            counter_df['Counter'] = pd.to_numeric(counter_df['Counter'], errors='coerce').fillna(0)
+            counter_df['Pct Change'] = counter_df['Counter'].pct_change().fillna(0) * 100
+        
+            fig_counter = px.line(
+                counter_df,
+                x='Date',
+                y='Pct Change',
+                title="Daily Counter % Change from Previous Day (Last 30 Days)",
+                markers=True,
+                text='Counter'
+            )
+        
+            fig_counter.update_layout(
+                yaxis=dict(title="Percentage Change (%)"),
+                xaxis_title="Date",
+                template="plotly_white"
+            )
+        
+            st.plotly_chart(fig_counter, use_container_width=True)
+        else:
+            st.info("No PLC daily counter data available yet. It will appear once updated.")
         st.markdown("---")
         graph_column_1,graph_column_2 = st.columns([0.6,0.4])
         with graph_column_1:
@@ -278,5 +326,37 @@ def main():
         ErrorHandler.log_error(e)
         st.error(f"❌ An error occurred: {e}")
 
+st.markdown("---")
+st.markdown("### 📊 30-Day PLC Daily Counter (% Change from Previous Day)")
+
+if not counter_df.empty:
+    counter_df['Date'] = pd.to_datetime(counter_df['Date'])
+    counter_df = counter_df.sort_values('Date').tail(30)
+
+    # Calculate percentage change, fill missing or invalid values with 0
+    counter_df['Counter'] = pd.to_numeric(counter_df['Counter'], errors='coerce').fillna(0)
+    counter_df['Pct Change'] = counter_df['Counter'].pct_change().fillna(0) * 100
+
+    fig_counter = px.line(
+        counter_df,
+        x='Date',
+        y='Pct Change',
+        title="Daily Counter % Change from Previous Day (Last 30 Days)",
+        markers=True,
+        text='Counter'  # optional: hover raw value
+    )
+
+    fig_counter.update_layout(
+        yaxis=dict(title="Percentage Change (%)"),
+        xaxis_title="Date",
+        template="plotly_white"
+    )
+
+    st.plotly_chart(fig_counter, use_container_width=True)
+else:
+    st.info("No PLC daily counter data available yet. It will appear once updated.")
+
+
 if __name__ == "__main__":
     main()
+
