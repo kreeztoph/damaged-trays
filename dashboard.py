@@ -24,7 +24,7 @@ if "manual_refresh" not in st.session_state:
 
 # Only auto-refresh if manual refresh not just triggered
 if not st.session_state.manual_refresh:
-    count = st_autorefresh(interval=1800000, limit=None, key="auto-refresh")
+    count = st_autorefresh(interval=300000, limit=None, key="auto-refresh")
 
 # Google Sheets config
 sheet_name = "Data Monitor ENIS"
@@ -112,6 +112,7 @@ def main():
         daily_df = load_df(daily_sheet)
         counter_df = load_df(triggered_sheet, parse_dates="Date")
 
+        # --- TOP DASHBOARD ROW ---
         cols1, cols2, cols3, cols4, cols5 = st.columns(5)
 
         with cols1:
@@ -158,7 +159,7 @@ def main():
                     counter_df['Counter'] = pd.to_numeric(counter_df['Counter'], errors='coerce').fillna(0)
 
                     if TEMP_PATCH:
-                        counter_df.loc[counter_df.index[-1], 'Counter'] = PATCHED_VALUE  # 🔧 apply patch
+                        counter_df.loc[counter_df.index[-1], 'Counter'] = PATCHED_VALUE  # 🔧 patch latest
 
                     counter_df['Pct Change'] = counter_df['Counter'].pct_change().fillna(0) * 100
 
@@ -187,16 +188,16 @@ def main():
                 )
 
         st.markdown("---")
-        st.markdown("### 📊 30-Day PLC Daily Counter (% Change from Previous Day)")
 
+        # --- 30-Day PLC Counter Chart ---
+        st.markdown("### 📊 30-Day PLC Daily Counter (% Change from Previous Day)")
         if not counter_df.empty:
             counter_df['Date'] = pd.to_datetime(counter_df['Date'])
             counter_df = counter_df.sort_values('Date').tail(30)
-
             counter_df['Counter'] = pd.to_numeric(counter_df['Counter'], errors='coerce').fillna(0)
 
             if TEMP_PATCH:
-                counter_df.loc[counter_df.index[-1], 'Counter'] = PATCHED_VALUE  # 🔧 apply patch
+                counter_df.loc[counter_df.index[-1], 'Counter'] = PATCHED_VALUE  # 🔧 patch latest
 
             counter_df['Pct Change'] = counter_df['Counter'].pct_change().fillna(0) * 100
 
@@ -214,10 +215,120 @@ def main():
                 xaxis_title="Date",
                 template="plotly_white"
             )
-
             st.plotly_chart(fig_counter, use_container_width=True)
         else:
             st.info("No PLC daily counter data available yet. It will appear once updated.")
+
+        st.markdown("---")
+
+        # --- Memory Graph & Daily Scans ---
+        graph_column_1, graph_column_2 = st.columns([0.6, 0.4])
+        with graph_column_1:
+            st.markdown("### 📈 Tray Appearances Over Time")
+            if not memory_df.empty:
+                memory_df = memory_df.sort_values('Most Recent Timestamp')
+                memory_df['Corrected Timestamp'] = memory_df['Most Recent Timestamp'] + pd.Timedelta(hours=1)
+                memory_df['Corrected Timestamp'] = memory_df['Corrected Timestamp'].dt.strftime('%d %b, %Y %H:%M')
+                memory_df = memory_df[memory_df['Count'] > 1]
+
+                fig = px.line(
+                    memory_df,
+                    x='Corrected Timestamp',
+                    y='Count',
+                    hover_data=['Tray ID'],
+                    title='Memory Data Over Time'
+                )
+                st.plotly_chart(fig)
+            else:
+                st.info("No memory data available to plot.")
+
+        with graph_column_2:
+            st.subheader('Daily scans count')
+            if not daily_df.empty:
+                daily_df = daily_df.sort_values('Date')
+
+                fig_1 = px.line(
+                    daily_df,
+                    x='Date',
+                    y='Daily Trigger Count',
+                    title='Daily Tray Scans'
+                )
+                fig_1.update_layout(yaxis=dict(range=[0, daily_df['Daily Trigger Count'].max()]))
+                st.plotly_chart(fig_1)
+            else:
+                st.info("No daily count available to plot.")
+
+        st.markdown("---")
+
+        # --- Time Filtering & Top Trays ---
+        if "filtered_df" not in st.session_state:
+            st.session_state.filtered_df = memory_df.copy()
+
+        time_options = ["All Data", "Last 1 Day", "Last 2 Days", "Last 7 Days", "Last 1 Month", "Custom Range"]
+        if "selected_time_filter" not in st.session_state:
+            st.session_state.selected_time_filter = "All Data"
+
+        selected_time = st.selectbox("Select Time Range", time_options, key="selected_time_filter")
+        now = pd.Timestamp.now()
+
+        if selected_time == "Last 1 Day":
+            filtered_df = memory_df[memory_df["Most Recent Timestamp"] >= now - pd.Timedelta(days=1)]
+        elif selected_time == "Last 2 Days":
+            filtered_df = memory_df[memory_df["Most Recent Timestamp"] >= now - pd.Timedelta(days=2)]
+        elif selected_time == "Last 7 Days":
+            filtered_df = memory_df[memory_df["Most Recent Timestamp"] >= now - pd.Timedelta(days=7)]
+        elif selected_time == "Last 1 Month":
+            filtered_df = memory_df[memory_df["Most Recent Timestamp"] >= now - pd.Timedelta(days=30)]
+        elif selected_time == "Custom Range":
+            with st.form("Custom Range Selection"):
+                st.write("### Select Date Range")
+                min_date = memory_df["Most Recent Timestamp"].min()
+                max_date = memory_df["Most Recent Timestamp"].max()
+                start_date = st.date_input("Start Date", min_value=min_date, value=min_date)
+                end_date = st.date_input("End Date", min_value=min_date, value=max_date)
+                submitted = st.form_submit_button("Apply Filter")
+
+            if submitted:
+                filtered_df = memory_df[
+                    (memory_df["Most Recent Timestamp"] >= pd.to_datetime(start_date)) &
+                    (memory_df["Most Recent Timestamp"] <= pd.to_datetime(end_date))
+                ]
+            else:
+                filtered_df = memory_df.copy()
+        else:
+            filtered_df = memory_df.copy()
+
+        colz1, colz2, colz3, colz4, colz5, colz6 = st.columns(6)
+        with colz1:
+            st.metric(label='Total Tray Count', value=len(filtered_df['Tray ID'].unique()), border=True)
+
+        top_Trays = filtered_df.sort_values("Count", ascending=False).head(5)
+        columns = [colz2, colz3, colz4, colz5, colz6]
+        for i, (_, row) in enumerate(top_Trays.iterrows()):
+            with columns[i]:
+                st.metric(
+                    label=f"{i + 1}️⃣ Concern",
+                    value=f"{row['Tray ID']}",
+                    help=f"Last Seen: {row['Corrected Timestamp']}\n | Total Scans: {row['Count']}",
+                    border=True
+                )
+
+        column1, column2 = st.columns([0.3, 0.7])
+        with column1:
+            if not filtered_df.empty:
+                st.dataframe(filtered_df, hide_index=True)
+        with column2:
+            if not filtered_df.empty:
+                fig = px.line(
+                    filtered_df,
+                    x='Most Recent Timestamp',
+                    y='Count',
+                    hover_data=['Tray ID'],
+                    title='Filtered Memory Data Over Time'
+                )
+                st.plotly_chart(fig)
+            else:
+                st.info("No data available for the selected time range.")
 
     except Exception as e:
         ErrorHandler.log_error(e)
@@ -226,6 +337,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
 
 
 
