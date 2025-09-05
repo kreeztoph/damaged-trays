@@ -211,9 +211,12 @@ def main():
             )
 
             fig_counter.update_layout(
-                yaxis=dict(title="Percentage Change (%)"),
-                xaxis_title="Date",
-                template="plotly_white"
+                xaxis=dict(
+                title="Date",
+                tickformat="%b %d, %Y"  # shows only date, no time
+            ),
+            yaxis=dict(title="Percentage Change (%)"),
+            template="plotly_white"
             )
             st.plotly_chart(fig_counter, use_container_width=True)
         else:
@@ -337,6 +340,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
