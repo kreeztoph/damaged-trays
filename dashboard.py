@@ -324,38 +324,39 @@ def main():
         st.error(f"❌ An error occurred: {e}")
 
 
-    st.markdown("---")
-    st.markdown("### 📊 30-Day PLC Daily Counter (% Change from Previous Day)")
-    
-    if not counter_df.empty:
-        counter_df['Date'] = pd.to_datetime(counter_df['Date'])
-        counter_df = counter_df.sort_values('Date').tail(30)
-    
-        # Calculate percentage change, fill missing or invalid values with 0
-        counter_df['Counter'] = pd.to_numeric(counter_df['Counter'], errors='coerce').fillna(0)
-        counter_df['Pct Change'] = counter_df['Counter'].pct_change().fillna(0) * 100
-    
-        fig_counter = px.line(
-            counter_df,
-            x='Date',
-            y='Pct Change',
-            title="Daily Counter % Change from Previous Day (Last 30 Days)",
-            markers=True,
-            text='Counter'  # optional: hover raw value
-        )
-    
-        fig_counter.update_layout(
-            yaxis=dict(title="Percentage Change (%)"),
-            xaxis_title="Date",
-            template="plotly_white"
-        )
-    
-        st.plotly_chart(fig_counter, use_container_width=True)
-    else:
-        st.info("No PLC daily counter data available yet. It will appear once updated.")
+        st.markdown("---")
+        st.markdown("### 📊 30-Day PLC Daily Counter (% Change from Previous Day)")
+        
+        if not counter_df.empty:
+            counter_df['Date'] = pd.to_datetime(counter_df['Date'])
+            counter_df = counter_df.sort_values('Date').tail(30)
+        
+            # Calculate percentage change, fill missing or invalid values with 0
+            counter_df['Counter'] = pd.to_numeric(counter_df['Counter'], errors='coerce').fillna(0)
+            counter_df['Pct Change'] = counter_df['Counter'].pct_change().fillna(0) * 100
+        
+            fig_counter = px.line(
+                counter_df,
+                x='Date',
+                y='Pct Change',
+                title="Daily Counter % Change from Previous Day (Last 30 Days)",
+                markers=True,
+                text='Counter'  # optional: hover raw value
+            )
+        
+            fig_counter.update_layout(
+                yaxis=dict(title="Percentage Change (%)"),
+                xaxis_title="Date",
+                template="plotly_white"
+            )
+        
+            st.plotly_chart(fig_counter, use_container_width=True)
+        else:
+            st.info("No PLC daily counter data available yet. It will appear once updated.")
 
 
 if __name__ == "__main__":
     main()
+
 
 
