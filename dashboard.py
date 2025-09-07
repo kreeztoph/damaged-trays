@@ -192,7 +192,7 @@ def main():
         # --- 30-Day PLC Counter Chart ---
         st.markdown("### 📊 30-Day PLC Daily Counter (% Change from Previous Day)")
         if not counter_df.empty:
-            counter_df['Date'] = pd.to_datetime(counter_df['Date'])
+            counter_df['Date'] = pd.to_datetime(counter_df['Date']).dt.date
             counter_df = counter_df.sort_values('Date').tail(30)
             counter_df['Counter'] = pd.to_numeric(counter_df['Counter'], errors='coerce').fillna(0)
 
@@ -345,6 +345,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
