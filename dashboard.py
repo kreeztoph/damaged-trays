@@ -24,7 +24,7 @@ if "manual_refresh" not in st.session_state:
 
 # Only auto-refresh if manual refresh not just triggered
 if not st.session_state.manual_refresh:
-    count = st_autorefresh(interval=300000, limit=None, key="auto-refresh")
+    count = st_autorefresh(interval=1800000, limit=None, key="auto-refresh")
 
 # Google Sheets config
 sheet_name = "Data Monitor ENIS"
@@ -209,15 +209,20 @@ def main():
                 markers=True,
                 text='Counter'
             )
-
             fig_counter.update_layout(
-                xaxis=dict(
-                title="Date",
-                tickformat="%b %d, %Y"  # shows only date, no time
-            ),
+            xaxis_title="Date",
             yaxis=dict(title="Percentage Change (%)"),
             template="plotly_white"
             )
+
+            # fig_counter.update_layout(
+            #     xaxis=dict(
+            #     title="Date",
+            #     #tickformat="%b %d, %Y"  # shows only date, no time
+            # ),
+            # yaxis=dict(title="Percentage Change (%)"),
+            # template="plotly_white"
+            # )
             st.plotly_chart(fig_counter, use_container_width=True)
         else:
             st.info("No PLC daily counter data available yet. It will appear once updated.")
@@ -340,6 +345,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
