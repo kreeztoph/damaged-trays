@@ -205,10 +205,11 @@ def main():
                 counter_df,
                 x='Date',
                 y='Pct Change',
-                title="Daily Counter % Change from Previous Day (Last 30 Days)",
+                title="Triggered Trays % Change from Previous Day (Last 30 Days)",
                 markers=True,
                 text='Counter'
             )
+            fig_counter.update_xaxes(type='category')
             fig_counter.update_layout(
             xaxis_title="Date",
             yaxis=dict(title="Percentage Change (%)"),
@@ -345,6 +346,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
