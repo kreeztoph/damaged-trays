@@ -163,7 +163,8 @@ def main():
                         counter_df.loc[counter_df.index[-1], 'Counter'] = PATCHED_VALUE  # 🔧 patch latest
 
                     counter_df['Pct Change'] = counter_df['Counter'].pct_change().fillna(0) * 100
-                    df.loc[df["Counter"].shift(1) == 0, "PercentChange"] = None
+                    counter_df.loc[df["Counter"].shift(1) == 0, "PercentChange"] = None
+                    counter_df["PercentChange"].iloc[0] = None
 
                     latest_pct = counter_df['Pct Change'].iloc[-1]
                     latest_value = int(counter_df['Counter'].iloc[-1])
@@ -350,6 +351,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
