@@ -202,6 +202,8 @@ def main():
                 counter_df.loc[counter_df.index[-1], 'Counter'] = PATCHED_VALUE  # 🔧 patch latest
 
             counter_df['Pct Change'] = counter_df['Counter'].pct_change().fillna(0) * 100
+            df.loc[df["Counter"].shift(1) == 0, "PercentChange"] = None
+            df["PercentChange"].iloc[0] = None
 
             fig_counter = px.line(
                 counter_df,
@@ -348,6 +350,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
