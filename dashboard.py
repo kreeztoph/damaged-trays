@@ -9,7 +9,7 @@ from streamlit_autorefresh import st_autorefresh
 import plotly.express as px
 
 # --- TEMP PATCH FLAG ---
-TEMP_PATCH = True   # 🔧 set to False once backend is fixed
+TEMP_PATCH = False   # 🔧 set to False once backend is fixed
 PATCHED_VALUE = 18618
 
 # Reset manual_refresh after rerun
@@ -111,6 +111,7 @@ def main():
         memory_df = load_df(memory_sheet, parse_dates="Most Recent Timestamp")
         daily_df = load_df(daily_sheet)
         counter_df = load_df(triggered_sheet, parse_dates="Date")
+        counter_df = df.dropna(subset=["Counter"])
 
         # --- TOP DASHBOARD ROW ---
         cols1, cols2, cols3, cols4, cols5 = st.columns(5)
@@ -346,6 +347,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
