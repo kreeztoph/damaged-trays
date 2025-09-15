@@ -224,7 +224,7 @@ def main():
         st.subheader("📊 Daily Defective % (Last 30 Days)")
         # Ensure Date is datetime
         # Ensure daily_df is loaded and has columns: 'Date', 'Defective %', 'Total Scanned'
-        daily_df['Date'] = pd.to_datetime(daily_df['Date'], dayfirst=True)
+        daily_df['Date'] = pd.to_datetime(daily_df['Date'], dayfirst=True).dt.date
         daily_plot = daily_df.groupby('Date').last().reset_index()
         
         # Define spike coloring thresholds for markers
@@ -423,6 +423,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
