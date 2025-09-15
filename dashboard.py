@@ -226,36 +226,33 @@ def main():
         # Ensure Date is datetime
         daily_df['Date'] = pd.to_datetime(daily_df['Date'], dayfirst=True)
         
-        # Define spike coloring thresholds
+        # Assign marker color based on Defective %
         def assign_color(value):
-            if value < 2:        # low
+            if value < 2:
                 return 'green'
-            elif value < 5:      # medium
+            elif value < 5:
                 return 'orange'
-            else:                # high
+            else:
                 return 'red'
         
         daily_df['Color'] = daily_df['Defective %'].apply(assign_color)
         
-        # --- Create figure ---
+        # Create figure with single continuous line
         fig_defect = go.Figure()
         
-        # Because we want colored lines by segment, we loop through consecutive points of same color
-        for color in daily_df['Color'].unique():
-            df_seg = daily_df[daily_df['Color'] == color]
-            fig_defect.add_trace(go.Scatter(
-                x=df_seg['Date'],
-                y=df_seg['Defective %'],
-                mode='lines+markers',
-                line=dict(color=color, width=2),
-                marker=dict(size=6),
-                hovertemplate=
-                    'Date: %{x|%d/%m/%Y}<br>'+
-                    'Defective %: %{y:.1f}<br>'+
-                    'Total Scanned: %{customdata}',
-                customdata=df_seg['Total Scanned'],
-                name=f"{color.capitalize()} Spike"
-            ))
+        fig_defect.add_trace(go.Scatter(
+            x=daily_df['Date'],
+            y=daily_df['Defective %'],
+            mode='lines+markers',
+            line=dict(color='blue', width=2),      # continuous line color
+            marker=dict(color=daily_df['Color'], size=6),  # colored markers
+            hovertemplate=
+                'Date: %{x|%d/%m/%Y}<br>'+
+                'Defective %: %{y:.1f}<br>'+
+                'Total Scanned: %{customdata}',
+            customdata=daily_df['Total Scanned'],
+            showlegend=False
+        ))
         
         # Layout
         fig_defect.update_layout(
@@ -263,11 +260,9 @@ def main():
             xaxis_title="Date",
             yaxis_title="Defective %",
             template="plotly_white",
-            legend_title_text="Spike Level",
             hovermode='x unified'
         )
         
-        # Display in Streamlit
         st.plotly_chart(fig_defect, use_container_width=True)
 
            
@@ -417,6 +412,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
