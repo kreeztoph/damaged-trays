@@ -322,7 +322,7 @@ def main():
                     y='Count',
                     hover_data=['Tray ID'],
                     title='Memory Data Over Time',
-                    line=dict(color='Purple')
+                    
                 )
                 st.plotly_chart(fig)
             else:
@@ -423,6 +423,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
