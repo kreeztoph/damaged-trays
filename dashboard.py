@@ -222,9 +222,8 @@ def main():
         #     )
         st.subheader("📊 Daily Tray Defective %")
         if not daily_df.empty:
-            daily_df['Counter'] = pd.to_numeric(daily_df['Counter'], errors='coerce').fillna(0)
             daily_df['Total Scanned'] = pd.to_numeric(daily_df['Total Scanned'], errors='coerce').fillna(0)
-            daily_df['Defective %'] = (daily_df['Counter'] / daily_df['Total Scanned'] * 100).round(1)
+            daily_df['Defective %'] = pd.to_numeric(daily_df['Defective %'], errors='coerce').fillna(0)
 
             latest_def_pct = daily_df['Defective %'].iloc[-1]
             latest_total = int(daily_df['Total Scanned'].iloc[-1])
@@ -406,6 +405,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
