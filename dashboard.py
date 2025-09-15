@@ -153,73 +153,88 @@ def main():
             formatted_time = format_custom_datetime(latest_time) if latest_time else "N/A"
             st.metric("Last Scanned Tray Time", formatted_time, border=True)
 
-        with cols5:
-            st.subheader("📊 PLC Counter Insights")
-            if not counter_df.empty:
-                try:
-                    counter_df['Counter'] = pd.to_numeric(counter_df['Counter'], errors='coerce').fillna(0)
+        # with cols5:
+        #     st.subheader("📊 PLC Counter Insights")
+        #     if not counter_df.empty:
+        #         try:
+        #             counter_df['Counter'] = pd.to_numeric(counter_df['Counter'], errors='coerce').fillna(0)
 
-                    if TEMP_PATCH:
-                        counter_df.loc[counter_df.index[-1], 'Counter'] = PATCHED_VALUE  # 🔧 patch latest
+        #             if TEMP_PATCH:
+        #                 counter_df.loc[counter_df.index[-1], 'Counter'] = PATCHED_VALUE  # 🔧 patch latest
 
-                    counter_df['Pct Change'] = counter_df['Counter'].pct_change().fillna(0) * 100
-                    counter_df.loc[counter_df['Counter'].shift(1) == 0, 'Pct Change'] = None
-                    counter_df['Pct Change'].iloc[0] = None
+        #             counter_df['Pct Change'] = counter_df['Counter'].pct_change().fillna(0) * 100
+        #             counter_df.loc[counter_df['Counter'].shift(1) == 0, 'Pct Change'] = None
+        #             counter_df['Pct Change'].iloc[0] = None
 
-                    latest_pct = counter_df['Pct Change'].iloc[-1]
-                    latest_value = int(counter_df['Counter'].iloc[-1])
+        #             latest_pct = counter_df['Pct Change'].iloc[-1]
+        #             latest_value = int(counter_df['Counter'].iloc[-1])
 
-                    label = "Latest Tray Trigger Change"
-                    if TEMP_PATCH:
-                        label += " (patched)"
+        #             label = "Latest Tray Trigger Change"
+        #             if TEMP_PATCH:
+        #                 label += " (patched)"
 
-                    st.metric(
-                        label=label,
-                        value=f"{latest_pct:.1f}%",
-                        delta=f"{latest_value} raw triggers",
-                        delta_color="inverse"
-                    )
-                except Exception as e:
-                    ErrorHandler.log_error(e)
-                    st.warning("⚠️ Could not calculate PLC counter metrics.")
-            else:
-                st.metric(
-                    label="Latest PLC Counter Change (patched)" if TEMP_PATCH else "Latest PLC Counter Change",
-                    value="N/A",
-                    delta=f"{PATCHED_VALUE} raw triggers (temp)" if TEMP_PATCH else "N/A",
-                    delta_color="off"
-                )
+        #             st.metric(
+        #                 label=label,
+        #                 value=f"{latest_pct:.1f}%",
+        #                 delta=f"{latest_value} raw triggers",
+        #                 delta_color="inverse"
+        #             )
+        #         except Exception as e:
+        #             ErrorHandler.log_error(e)
+        #             st.warning("⚠️ Could not calculate PLC counter metrics.")
+        #     else:
+        #         st.metric(
+        #             label="Latest PLC Counter Change (patched)" if TEMP_PATCH else "Latest PLC Counter Change",
+        #             value="N/A",
+        #             delta=f"{PATCHED_VALUE} raw triggers (temp)" if TEMP_PATCH else "N/A",
+        #             delta_color="off"
+        #         )
 
         st.markdown("---")
 
         # --- 30-Day PLC Counter Chart ---
-        st.markdown("### 📊 30-Day PLC Daily Counter (% Change from Previous Day)")
-        if not counter_df.empty:
-            counter_df['Date'] = pd.to_datetime(counter_df['Date']).dt.date
-            counter_df = counter_df.sort_values('Date').tail(30)
-            counter_df['Counter'] = pd.to_numeric(counter_df['Counter'], errors='coerce').fillna(0)
+        # st.markdown("### 📊 30-Day PLC Daily Counter (% Change from Previous Day)")
+        # if not counter_df.empty:
+        #     counter_df['Date'] = pd.to_datetime(counter_df['Date']).dt.date
+        #     counter_df = counter_df.sort_values('Date').tail(30)
+        #     counter_df['Counter'] = pd.to_numeric(counter_df['Counter'], errors='coerce').fillna(0)
 
-            if TEMP_PATCH:
-                counter_df.loc[counter_df.index[-1], 'Counter'] = PATCHED_VALUE  # 🔧 patch latest
+        #     if TEMP_PATCH:
+        #         counter_df.loc[counter_df.index[-1], 'Counter'] = PATCHED_VALUE  # 🔧 patch latest
 
-            counter_df['Pct Change'] = counter_df['Counter'].pct_change().fillna(0) * 100
-            counter_df.loc[counter_df['Counter'].shift(1) == 0, 'Pct Change'] = None
-            counter_df['Pct Change'].iloc[0] = None
+        #     counter_df['Pct Change'] = counter_df['Counter'].pct_change().fillna(0) * 100
+        #     counter_df.loc[counter_df['Counter'].shift(1) == 0, 'Pct Change'] = None
+        #     counter_df['Pct Change'].iloc[0] = None
 
-            fig_counter = px.line(
-                counter_df,
+        #     fig_counter = px.line(
+        #         counter_df,
+        #         x='Date',
+        #         y='Pct Change',
+        #         title="Triggered Trays % Change from Previous Day (Last 30 Days)",
+        #         markers=True,
+        #         text='Counter'
+        #     )
+        #     fig_counter.update_xaxes(type='category')
+        #     fig_counter.update_layout(
+        #     xaxis_title="Date",
+        #     yaxis=dict(title="Percentage Change (%)"),
+        #     template="plotly_white"
+        #     )
+
+            fig_defect = px.line(
+                df,
                 x='Date',
-                y='Pct Change',
-                title="Triggered Trays % Change from Previous Day (Last 30 Days)",
+                y=['Defective %', 'Defective % 7d Avg'],
                 markers=True,
-                text='Counter'
+                title="📊 Daily Defective % (Last 30 Days) with 7-Day Rolling Average"
             )
-            fig_counter.update_xaxes(type='category')
-            fig_counter.update_layout(
-            xaxis_title="Date",
-            yaxis=dict(title="Percentage Change (%)"),
-            template="plotly_white"
+            fig_defect.update_layout(
+                yaxis_title="Defective %",
+                xaxis_title="Date",
+                template="plotly_white",
+                legend_title_text="Metrics"
             )
+            st.plotly_chart(fig_defect, use_container_width=True)
 
             # fig_counter.update_layout(
             #     xaxis=dict(
@@ -229,7 +244,7 @@ def main():
             # yaxis=dict(title="Percentage Change (%)"),
             # template="plotly_white"
             # )
-            st.plotly_chart(fig_counter, use_container_width=True)
+            #st.plotly_chart(fig_counter, use_container_width=True)
         else:
             st.info("No PLC daily counter data available yet. It will appear once updated.")
 
@@ -351,6 +366,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
