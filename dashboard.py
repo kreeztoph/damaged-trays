@@ -222,11 +222,11 @@ def main():
         #     )
 
         fig_defect = px.line(
-            df,
+            daily_df,
             x='Date',
-            y=['Defective %', 'Defective % 7d Avg'],
+            y=['Defective %'],
             markers=True,
-            title="📊 Daily Defective % (Last 30 Days) with 7-Day Rolling Average"
+            title="📊 Daily Defective % (Last 30 Days)"
         )
         fig_defect.update_layout(
             yaxis_title="Defective %",
@@ -366,6 +366,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
