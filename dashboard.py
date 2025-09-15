@@ -118,7 +118,7 @@ def main():
         cols1, cols2, cols3, cols4 = st.columns(4)
 
         with cols1:
-            st.subheader("📋 Latest PLC Data      ")
+            st.subheader("📋 Latest PLC Data ***** ")
             if not plc_df.empty:
                 plc_df_display = plc_df.copy()
                 plc_df_display['Timestamp'] = pd.to_datetime(plc_df_display['Timestamp']) + pd.Timedelta(hours=1)
@@ -145,7 +145,7 @@ def main():
                 st.info("No Daily data")
 
         with cols4:
-            st.subheader("📦 Scanned Tray Insights")
+            st.subheader("📦 Scanned Tray Insights *****")
             total_Trays = memory_df['Tray ID'].nunique() if not memory_df.empty else 0
             st.metric("Unique Trays Scanned", f"{total_Trays} Trays", border=True)
             total_appearances = memory_df['Count'].sum() if not memory_df.empty else 0
@@ -424,6 +424,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
