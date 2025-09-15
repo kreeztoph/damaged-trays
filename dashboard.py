@@ -118,7 +118,7 @@ def main():
         cols1, cols2, cols3, cols4 = st.columns(4)
 
         with cols1:
-            st.subheader("📋 Latest PLC Data")
+            st.subheader("📋 Latest PLC Data      ")
             if not plc_df.empty:
                 plc_df_display = plc_df.copy()
                 plc_df_display['Timestamp'] = pd.to_datetime(plc_df_display['Timestamp']) + pd.Timedelta(hours=1)
@@ -423,6 +423,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
