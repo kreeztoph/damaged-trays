@@ -222,10 +222,10 @@ def main():
         #     template="plotly_white"
         #     )
         st.subheader("📊 Daily Defective % (Last 30 Days)")
-        # Assume daily_df has columns: 'Date', 'Defective %', 'Total Scanned'
         # Ensure Date is datetime
         # Ensure daily_df is loaded and has columns: 'Date', 'Defective %', 'Total Scanned'
         daily_df['Date'] = pd.to_datetime(daily_df['Date'], dayfirst=True)
+        daily_plot = daily_df.groupby('Date').last().reset_index()
         
         # Define spike coloring thresholds for markers
         def assign_color(value):
@@ -246,7 +246,7 @@ def main():
             x=daily_df['Date'],
             y=daily_df['Defective %'],
             mode='lines+markers',
-            line=dict(color='pink', width=2),  # pretty pink line
+            line=dict(color='Orange', width=2),  # pretty pink line
             marker=dict(color=daily_df['Color'], size=8),
             hovertemplate=
                 'Date: %{x|%d/%m/%Y}<br>'+
@@ -322,6 +322,7 @@ def main():
                     y='Count',
                     hover_data=['Tray ID'],
                     title='Memory Data Over Time'
+                    line=dict(color='Purple')
                 )
                 st.plotly_chart(fig)
             else:
@@ -422,6 +423,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
