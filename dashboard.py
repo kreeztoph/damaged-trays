@@ -225,7 +225,7 @@ def main():
         # Ensure Date is datetime
         # Ensure daily_df is loaded and has columns: 'Date', 'Defective %', 'Total Scanned'
         daily_df['Date'] = pd.to_datetime(daily_df['Date'], dayfirst=True).dt.date
-        daily_plot = daily_df.groupby('Date').last().reset_index()
+        daily_plot = daily_df.sort_values('Date').drop_duplicates(subset='Date', keep='last')
         
         # Define spike coloring thresholds for markers
         def assign_color(value):
@@ -268,7 +268,8 @@ def main():
                 tickangle=-45,
                 tickfont=dict(size=10),
                 nticks=30,
-                tickformat="%d/%m"
+                tickformat="%d/%m",
+                type='category'
             )
         )
         
@@ -423,6 +424,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
