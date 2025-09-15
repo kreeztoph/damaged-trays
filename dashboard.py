@@ -221,45 +221,45 @@ def main():
         #     template="plotly_white"
         #     )
         st.subheader("📊 Daily Tray Defective %")
-            if not daily_df.empty:
-                daily_df['Counter'] = pd.to_numeric(daily_df['Counter'], errors='coerce').fillna(0)
-                daily_df['Total Scanned'] = pd.to_numeric(daily_df['Total Scanned'], errors='coerce').fillna(0)
-                daily_df['Defective %'] = (daily_df['Counter'] / daily_df['Total Scanned'] * 100).round(1)
+        if not daily_df.empty:
+            daily_df['Counter'] = pd.to_numeric(daily_df['Counter'], errors='coerce').fillna(0)
+            daily_df['Total Scanned'] = pd.to_numeric(daily_df['Total Scanned'], errors='coerce').fillna(0)
+            daily_df['Defective %'] = (daily_df['Counter'] / daily_df['Total Scanned'] * 100).round(1)
 
-                latest_def_pct = daily_df['Defective %'].iloc[-1]
-                latest_total = int(daily_df['Total Scanned'].iloc[-1])
-                st.metric(label="Latest Defective %", value=f"{latest_def_pct:.1f}%", delta=f"{latest_total} trays scanned")
+            latest_def_pct = daily_df['Defective %'].iloc[-1]
+            latest_total = int(daily_df['Total Scanned'].iloc[-1])
+            st.metric(label="Latest Defective %", value=f"{latest_def_pct:.1f}%", delta=f"{latest_total} trays scanned")
 
-                # Dynamic coloring
-                mean_def = daily_df['Defective %'].mean()
-                daily_df['Color'] = daily_df['Defective %'].apply(lambda x: 'red' if x>=mean_def*1.5 else ('green' if x<=mean_def*0.5 else 'orange'))
+            # Dynamic coloring
+            mean_def = daily_df['Defective %'].mean()
+            daily_df['Color'] = daily_df['Defective %'].apply(lambda x: 'red' if x>=mean_def*1.5 else ('green' if x<=mean_def*0.5 else 'orange'))
 
-                # Plot with spikes/drops
-                fig_def = px.scatter(
-                    daily_df,
-                    x='Date',
-                    y='Defective %',
-                    color='Color',
-                    color_discrete_map={'red':'red','orange':'orange','green':'green'},
-                    size='Defective %',
-                    size_max=15,
-                    text=daily_df['Defective %'].apply(lambda x: f"{x:.1f}%")
-                )
-                fig_def.update_traces(mode='lines+markers', line=dict(color='blue'), marker=dict(line=dict(width=1, color='black')))
+            # Plot with spikes/drops
+            fig_def = px.scatter(
+                daily_df,
+                x='Date',
+                y='Defective %',
+                color='Color',
+                color_discrete_map={'red':'red','orange':'orange','green':'green'},
+                size='Defective %',
+                size_max=15,
+                text=daily_df['Defective %'].apply(lambda x: f"{x:.1f}%")
+            )
+            fig_def.update_traces(mode='lines+markers', line=dict(color='blue'), marker=dict(line=dict(width=1, color='black')))
 
-                # Annotate spike/drop
-                max_idx = daily_df['Defective %'].idxmax()
-                min_idx = daily_df['Defective %'].idxmin()
-                fig_def.add_annotation(x=daily_df.loc[max_idx,'Date'], y=daily_df.loc[max_idx,'Defective %'],
-                                       text=f"Spike: {daily_df.loc[max_idx,'Defective %']:.1f}%", showarrow=True, arrowhead=2, ax=0, ay=-30, bgcolor="red", font=dict(color="white"))
-                fig_def.add_annotation(x=daily_df.loc[min_idx,'Date'], y=daily_df.loc[min_idx,'Defective %'],
-                                       text=f"Drop: {daily_df.loc[min_idx,'Defective %']:.1f}%", showarrow=True, arrowhead=2, ax=0, ay=30, bgcolor="green", font=dict(color="white"))
+            # Annotate spike/drop
+            max_idx = daily_df['Defective %'].idxmax()
+            min_idx = daily_df['Defective %'].idxmin()
+            fig_def.add_annotation(x=daily_df.loc[max_idx,'Date'], y=daily_df.loc[max_idx,'Defective %'],
+                                   text=f"Spike: {daily_df.loc[max_idx,'Defective %']:.1f}%", showarrow=True, arrowhead=2, ax=0, ay=-30, bgcolor="red", font=dict(color="white"))
+            fig_def.add_annotation(x=daily_df.loc[min_idx,'Date'], y=daily_df.loc[min_idx,'Defective %'],
+                                   text=f"Drop: {daily_df.loc[min_idx,'Defective %']:.1f}%", showarrow=True, arrowhead=2, ax=0, ay=30, bgcolor="green", font=dict(color="white"))
 
-                fig_def.update_layout(yaxis_title="Defective %", xaxis_title="Date", yaxis_range=[0, max(daily_df['Defective %'].max()*1.2,5)],
-                                      hovermode="x unified", showlegend=False)
-                st.plotly_chart(fig_def, use_container_width=True)
-            else:
-                st.info("No defective tray data available yet.")
+            fig_def.update_layout(yaxis_title="Defective %", xaxis_title="Date", yaxis_range=[0, max(daily_df['Defective %'].max()*1.2,5)],
+                                  hovermode="x unified", showlegend=False)
+            st.plotly_chart(fig_def, use_container_width=True)
+        else:
+            st.info("No defective tray data available yet.")
 
         # fig_defect = px.line(
         #     daily_df,
@@ -406,6 +406,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
