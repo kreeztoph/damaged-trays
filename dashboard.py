@@ -224,34 +224,36 @@ def main():
         st.subheader("📊 Daily Defective % (Last 30 Days)")
         # Assume daily_df has columns: 'Date', 'Defective %', 'Total Scanned'
         # Ensure Date is datetime
+        # Ensure daily_df is loaded and has columns: 'Date', 'Defective %', 'Total Scanned'
         daily_df['Date'] = pd.to_datetime(daily_df['Date'], dayfirst=True)
         
-        # Assign marker color based on Defective %
+        # Define spike coloring thresholds for markers
         def assign_color(value):
-            if value < 2:
+            if value < 2:        # low
                 return 'green'
-            elif value < 5:
+            elif value < 5:      # medium
                 return 'orange'
-            else:
+            else:                # high
                 return 'red'
         
         daily_df['Color'] = daily_df['Defective %'].apply(assign_color)
         
-        # Create figure with single continuous line
+        # Create figure
         fig_defect = go.Figure()
         
+        # Add a single pink line connecting all points
         fig_defect.add_trace(go.Scatter(
             x=daily_df['Date'],
             y=daily_df['Defective %'],
             mode='lines+markers',
-            line=dict(color='blue', width=2),      # continuous line color
-            marker=dict(color=daily_df['Color'], size=6),  # colored markers
+            line=dict(color='pink', width=2),  # pretty pink line
+            marker=dict(color=daily_df['Color'], size=8),
             hovertemplate=
                 'Date: %{x|%d/%m/%Y}<br>'+
                 'Defective %: %{y:.1f}<br>'+
                 'Total Scanned: %{customdata}',
             customdata=daily_df['Total Scanned'],
-            showlegend=False
+            name='Defective %'
         ))
         
         # Layout
@@ -260,9 +262,17 @@ def main():
             xaxis_title="Date",
             yaxis_title="Defective %",
             template="plotly_white",
-            hovermode='x unified'
+            hovermode='x unified',
+            xaxis=dict(
+                tickmode='auto',
+                tickangle=-45,
+                tickfont=dict(size=10),
+                nticks=30,
+                tickformat="%d/%m"
+            )
         )
         
+        # Display in Streamlit
         st.plotly_chart(fig_defect, use_container_width=True)
 
            
@@ -412,6 +422,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
