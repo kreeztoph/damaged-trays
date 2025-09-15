@@ -114,7 +114,7 @@ def main():
         counter_df = counter_df.dropna(subset=["Counter"])
 
         # --- TOP DASHBOARD ROW ---
-        cols1, cols2, cols3, cols4, cols5 = st.columns(5)
+        cols1, cols2, cols3, cols4 = st.columns(4)
 
         with cols1:
             st.subheader("📋 Latest PLC Data")
@@ -221,20 +221,20 @@ def main():
         #     template="plotly_white"
         #     )
 
-            fig_defect = px.line(
-                df,
-                x='Date',
-                y=['Defective %', 'Defective % 7d Avg'],
-                markers=True,
-                title="📊 Daily Defective % (Last 30 Days) with 7-Day Rolling Average"
-            )
-            fig_defect.update_layout(
-                yaxis_title="Defective %",
-                xaxis_title="Date",
-                template="plotly_white",
-                legend_title_text="Metrics"
-            )
-            st.plotly_chart(fig_defect, use_container_width=True)
+        fig_defect = px.line(
+            df,
+            x='Date',
+            y=['Defective %', 'Defective % 7d Avg'],
+            markers=True,
+            title="📊 Daily Defective % (Last 30 Days) with 7-Day Rolling Average"
+        )
+        fig_defect.update_layout(
+            yaxis_title="Defective %",
+            xaxis_title="Date",
+            template="plotly_white",
+            legend_title_text="Metrics"
+        )
+        st.plotly_chart(fig_defect, use_container_width=True)
 
             # fig_counter.update_layout(
             #     xaxis=dict(
@@ -245,8 +245,8 @@ def main():
             # template="plotly_white"
             # )
             #st.plotly_chart(fig_counter, use_container_width=True)
-        else:
-            st.info("No PLC daily counter data available yet. It will appear once updated.")
+        # else:
+        #     st.info("No PLC daily counter data available yet. It will appear once updated.")
 
         st.markdown("---")
 
@@ -366,6 +366,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
