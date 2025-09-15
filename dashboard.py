@@ -236,23 +236,23 @@ def main():
             else:                # high
                 return 'red'
         
-        daily_df['Color'] = daily_df['Defective %'].apply(assign_color)
+        daily_plot['Color'] = daily_plot['Defective %'].apply(assign_color)
         
         # Create figure
         fig_defect = go.Figure()
         
         # Add a single pink line connecting all points
         fig_defect.add_trace(go.Scatter(
-            x=daily_df['Date'],
-            y=daily_df['Defective %'],
+            x=daily_plot['Date'],
+            y=daily_plot['Defective %'],
             mode='lines+markers',
             line=dict(color='Orange', width=2),  # pretty pink line
-            marker=dict(color=daily_df['Color'], size=8),
+            marker=dict(color=daily_plot['Color'], size=8),
             hovertemplate=
                 'Date: %{x|%d/%m/%Y}<br>'+
                 'Defective %: %{y:.1f}<br>'+
                 'Total Scanned: %{customdata}',
-            customdata=daily_df['Total Scanned'],
+            customdata=daily_plot['Total Scanned'],
             name='Defective %'
         ))
         
@@ -423,6 +423,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
