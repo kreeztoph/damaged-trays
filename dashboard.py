@@ -258,7 +258,7 @@ def main():
         
         # Layout
         fig_defect.update_layout(
-            title="NOTE: Data is currently 24 hours behind, at midnight of the *current* day the *previous* day will update",
+            title="NOTE: Updates at 2AM for previous day data",
             xaxis_title="Date",
             yaxis_title="Defective %",
             template="plotly_white",
@@ -424,6 +424,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
