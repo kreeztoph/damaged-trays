@@ -330,7 +330,7 @@ def main():
                 st.info("No memory data available to plot.")
 
         with graph_column_2:
-            st.subheader('Daily scans count')
+            st.subheader('Daily Scans Count')
             if not daily_df.empty:
                 daily_df = daily_df.sort_values('Date')
 
@@ -424,6 +424,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
