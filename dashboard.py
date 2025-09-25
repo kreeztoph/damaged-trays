@@ -221,7 +221,7 @@ def main():
         #     yaxis=dict(title="Percentage Change (%)"),
         #     template="plotly_white"
         #     )
-        st.subheader("📊 Daily Defective % (Last 30 Days)")
+        st.subheader("🐥 Daily Defective % (Last 30 Days)")
         # Ensure Date is datetime
         # Ensure daily_df is loaded and has columns: 'Date', 'Defective %', 'Total Scanned'
         daily_df['Date'] = pd.to_datetime(daily_df['Date'], dayfirst=True).dt.date
@@ -424,6 +424,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
